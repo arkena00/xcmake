@@ -1,35 +1,18 @@
 #ifndef INCLUDE_XC_UTILITY_HPP_XCMAKE
 #define INCLUDE_XC_UTILITY_HPP_XCMAKE
 
-#include <reproc++/reproc.hpp>
+
 #include <xc/parameter.hpp>
 
+#include <chrono>
 #include <functional>
 #include <ranges>
 #include <string>
 #include <vector>
+#include <iostream>
 
 namespace xc
 {
-    class sink
-    {
-    public:
-        explicit sink(std::function<void(std::string)> callback) noexcept
-            : callback_(std::move(callback))
-        {}
-
-        std::error_code operator()(reproc::stream stream, const uint8_t* buffer, size_t size)
-        {
-            (void)stream;
-            if (size == 0) return {};
-            callback_(std::string{ reinterpret_cast<const char*>(buffer), size });
-            return {};
-        }
-
-    private:
-        std::function<void(std::string)> callback_;
-    };
-
     inline void str_replace(std::string& str, const std::string& from, const std::string& to)
     {
         if (from.empty()) return;
@@ -44,11 +27,13 @@ namespace xc
     template<class Duration>
     inline std::string to_string(const Duration& duration)
     {
-        auto t = std::chrono::system_clock::time_point { duration };
-        auto in_time_t = std::chrono::system_clock::to_time_t(t);
+        using namespace std::chrono;
+        auto h = duration_cast<hours>(duration).count();
+        auto m = duration_cast<minutes>(duration).count();
+        auto s = duration_cast<seconds>(duration).count();
 
         std::stringstream ss;
-        ss << std::put_time(std::localtime(&in_time_t), "%H:%M:%S.");
+        ss << std::setfill('0') << std::setw(2) << h << ":" <<std::setw(2) << m << ":" << std::setw(2) << s;
         return ss.str();
     }
 

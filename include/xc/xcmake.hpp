@@ -4,8 +4,7 @@
 #include <xc/parameter.hpp>
 #include <xc/utility.hpp>
 
-#include <reproc++/reproc.hpp>
-#include <reproc++/run.hpp>
+
 
 #include <format>
 #include <functional>
@@ -49,7 +48,7 @@ namespace xc
         template<typename... Args>
         void log(std::string_view message, Args&&...) const;
         void log_cmake(std::string message) const;
-        void log_xmake(std::string message) const;
+        void log_xmake(std::string message, bool single_line = false) const;
 
         void xmake_configure() const;
 
@@ -73,6 +72,9 @@ namespace xc
 
         output_callback clogger_;
         output_callback xlogger_;
+
+        int errors_count_;
+        int warnings_count_;
     };
 } // xc
 
@@ -88,21 +90,6 @@ namespace xc
     void xcmake::log(std::string_view message, Args&&... args) const
     {
         std::cout << color("[xc]", "34") << " " << std::vformat(message, std::make_format_args(args...)) << std::endl;
-    }
-
-    inline void xcmake::log_cmake(std::string message) const
-    {
-        if (message.empty() || message == "\n") return;
-        message.resize(message.size() - 1);
-        std::cout << ("[xc:" + color("cmake", "33") + "] ") << message << std::endl;
-    }
-
-    inline void xcmake::log_xmake(std::string message) const
-    {
-        if (message.empty() || message == "\n") return;
-        if (message.back() == '\n') message.resize(message.size() - 1);
-        if (!colorize_console_) message = clean_colors(message);
-        std::cout << ("[xc:" + color("xmake", "96") + "] ") << message << std::endl;
     }
 } // xc
 
