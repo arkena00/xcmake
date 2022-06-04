@@ -5,6 +5,7 @@ It's designed for CLion but it could work with other IDE using cmake, it's actua
 # prerequisites
 - **xmake** in the path
 - **cmake** in the path
+- an existing CMakeLists.txt (empty) in the project directory
 
 # usage
 - Replace cmake by the path to **xc** executable in the toolchain options \
