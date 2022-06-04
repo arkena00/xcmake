@@ -42,6 +42,19 @@ namespace xc
             verbose_ = verbose;
             return;
         }
+        // CLion create a _buildXXX dir in tmp and read values from the CMakeCache.txt in this dir
+        else if (has_parameter("CMAKE_TRY_COMPILE_TARGET_TYPE", xc::parameter_type::user_cmake))
+        {
+            auto verbose = verbose_;
+            verbose_ = false;
+
+            decltype(args_) args;
+            for (const auto& arg : args_) args.emplace_back("\"" + arg + "\"");
+            run("cmake", args);
+
+            verbose_ = verbose;
+            return;
+        }
         else if (has_parameter("G")) generate();
         else if (has_parameter("build")) build();
         else
@@ -208,10 +221,10 @@ namespace xc
 
     void xcmake::generate()
     {
-        std::string source_directory = ".";
-        if (has_parameter("S")) source_directory = parameter("S").value;
-        else source_directory = parameters_.back().value;
+        std::string source_directory = parameter_value("S", ".");
+        std::string build_directory = parameter_value("B", ".");
         log("source directory: {}", source_directory);
+        log("build directory: {}", source_directory);
         working_directory_ = source_directory;
 
         auto mode = xc::xmake_value[parameter_value("CMAKE_BUILD_TYPE", "Release")];
@@ -222,6 +235,8 @@ namespace xc
         xmake_config.emplace_back("-m");
         xmake_config.emplace_back(mode);
         xmake_config.emplace_back("--export=./" + mode + ".txt");
+        xmake_config.emplace_back("-y");
+
         for (const auto& parameter : parameters_)
         {
             if (parameter.type == xc::parameter_type::user)
@@ -243,8 +258,9 @@ namespace xc
         auto clog = [this](std::string data) {
             if (data == "-- Generating done\n") log("cmake generation succeed");
         };
-        // log("forward cmake initialization");
-        // run("cmake", args_, clog);
+        //log("forward cmake initialization");
+        //for (auto& item : args_) item = "\"" + item + "\"";
+        //run("cmake", args_, clogger_);
     }
 
     void xcmake::log_cmake(std::string message) const
@@ -273,6 +289,12 @@ namespace xc
         {
             type = color(" ", "33;43");
         }
+
+        str_replace(message, "template", "\033[38;2;240;126;29;1mtemplate\033[0m");
+        str_replace(message, "void", "\033[38;2;240;126;29;1mvoid\033[0m");
+        str_replace(message, "class", "\033[38;2;240;126;29;1m class \033[0m");
+        str_replace(message, "public:", "\033[38;2;240;126;29;1mpublic: \033[0m");
+        str_replace(message, "virtual", "\033[38;2;240;126;29;1m virtual \033[0m");
 
         if (single_line) std::cout << "\r";
         std::cout << ("[xc:" + color("xmake", "96") + "] ") << type << " " << message;
