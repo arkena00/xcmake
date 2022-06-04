@@ -17,4 +17,5 @@ jobs:
         with:
           repo_token: ${{ github.token }}
           file: build/windows/x64/release/xc.exe
+          tag: latest
           overwrite: true
