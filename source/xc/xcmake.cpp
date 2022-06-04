@@ -191,13 +191,13 @@ namespace xc
         else if (build_path.find("releasedbg") != std::string::npos) mode = "releasedbg";
         else mode = "release";
 
-        run("xmake", { "config", "--import=./" + mode + ".txt" }, xlogger_);
+        run("xmake", { "config", "-P", build_path, "--import=build/xmake-config-" + mode + ".txt" }, xlogger_);
 
         auto target_name = parameter_value("target", "all");
         auto target = target_name;
         if (target == "clean")
         {
-            run("xmake", "clean", xlogger_);
+            run("xmake", { "clean", "-P", build_path }, xlogger_);
             return;
         }
         else if (target_name == "all") target = "--all";
@@ -205,7 +205,7 @@ namespace xc
         log("initialize build | target {} | mode {}", color(target_name, "92"), color(mode, "92"));
 
         auto time = std::chrono::system_clock::now();
-        run("xmake", { "build", target }, [this](std::string data) {
+        run("xmake", { "build", "-P", build_path, target }, [this](std::string data) {
             log_xmake(data, false);
             if (data.find(": error") != std::string::npos) ++errors_count_;
             if (data.find(": warning") != std::string::npos) ++warnings_count_;
@@ -224,17 +224,18 @@ namespace xc
         std::string source_directory = parameter_value("S", ".");
         std::string build_directory = parameter_value("B", ".");
         log("source directory: {}", source_directory);
-        log("build directory: {}", source_directory);
+        log("build directory: {}", build_directory);
         working_directory_ = source_directory;
 
         auto mode = xc::xmake_value[parameter_value("CMAKE_BUILD_TYPE", "Release")];
 
         log("input configuration | mode {}", mode);
+        log("save xmake configuration to {}", source_directory + "/build/xmake-config-" + mode + ".txt");
         std::vector<std::string> xmake_config;
         xmake_config.emplace_back("config");
         xmake_config.emplace_back("-m");
         xmake_config.emplace_back(mode);
-        xmake_config.emplace_back("--export=./" + mode + ".txt");
+        xmake_config.emplace_back("--export=" + source_directory + "/build/xmake-config-" + mode + ".txt");
         xmake_config.emplace_back("-y");
 
         for (const auto& parameter : parameters_)
@@ -258,9 +259,11 @@ namespace xc
         auto clog = [this](std::string data) {
             if (data == "-- Generating done\n") log("cmake generation succeed");
         };
-        //log("forward cmake initialization");
-        //for (auto& item : args_) item = "\"" + item + "\"";
-        //run("cmake", args_, clogger_);
+
+        log("forward cmake initialization");
+        decltype(args_) args;
+        for (auto& item : args_) args.emplace_back("\"" + item + "\"");
+        run("cmake", args, clog);
     }
 
     void xcmake::log_cmake(std::string message) const
@@ -270,6 +273,7 @@ namespace xc
         std::cout << ("[xc:" + color("cmake", "33") + "] ") << message << std::endl;
     }
 
+    // todo use colorize function, only for build commands
     void xcmake::log_xmake(std::string message, bool single_line) const
     {
         if (message.back() == '\n') message.resize(message.size() - 2);
@@ -290,11 +294,12 @@ namespace xc
             type = color(" ", "33;43");
         }
 
+        /*
         str_replace(message, "template", "\033[38;2;240;126;29;1mtemplate\033[0m");
         str_replace(message, "void", "\033[38;2;240;126;29;1mvoid\033[0m");
         str_replace(message, "class", "\033[38;2;240;126;29;1m class \033[0m");
         str_replace(message, "public:", "\033[38;2;240;126;29;1mpublic: \033[0m");
-        str_replace(message, "virtual", "\033[38;2;240;126;29;1m virtual \033[0m");
+        str_replace(message, "virtual", "\033[38;2;240;126;29;1m virtual \033[0m");*/
 
         if (single_line) std::cout << "\r";
         std::cout << ("[xc:" + color("xmake", "96") + "] ") << type << " " << message;
