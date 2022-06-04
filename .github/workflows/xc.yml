@@ -1,7 +1,7 @@
 name: xc
 on:
   push:
-    branches: [dev, master, test]
+    branches: [dev, master]
 jobs:
   build:
     runs-on: windows-latest
