@@ -11,10 +11,10 @@ jobs:
           xmake-version: branch@dev
       - uses: actions/checkout@master
 
-      - run: echo ${{ github.token }} | gh auth login --with-token
-
       - run: xmake -P ${{ github.workspace }} -y
 
-      - run: |
-          gh release create latest || true
-          gh release upload latest build/windows/x64/release/xc.exe
+      - uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ github.token }}
+          file: build/windows/x64/release/xc.exe
+          overwrite: true
