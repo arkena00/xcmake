@@ -1,0 +1,20 @@
+name: xc
+on:
+  push:
+    branches: [dev, master, test]
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: branch@dev
+      - uses: actions/checkout@master
+
+      - run: echo ${{ github.token }} | gh auth login --with-token
+
+      - run: xmake -P ${{ github.workspace }} -y
+
+      - run: |
+          gh release create latest || true
+          gh release upload latest build/windows/x64/release/xc.exe
