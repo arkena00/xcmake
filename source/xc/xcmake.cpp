@@ -38,7 +38,7 @@ namespace xc
         {
             auto verbose = verbose_;
             verbose_ = false;
-            std::cout << "cmake version cmake " << cmake_version() << " | xmake " << xmake_version() << " | xc 1.0";
+            std::cout << "cmake version cmake " << cmake_version() << " | xmake " << xmake_version() << " | xc 1.0.2";
             verbose_ = verbose;
             return;
         }
@@ -50,7 +50,7 @@ namespace xc
 
             decltype(args_) args;
             for (const auto& arg : args_) args.emplace_back("\"" + arg + "\"");
-            run("cmake", args);
+            run("cmake", args, clogger_);
 
             verbose_ = verbose;
             return;
@@ -74,10 +74,10 @@ namespace xc
                 process_args,
                 working_directory_,
                 [&command](const char* bytes, size_t n) {
-                    std::cout << "[xc:run] " << command << "\n" << std::string{ bytes, n };
+                    std::cout << "[xc:run] " << command << "\n" << std::string{ bytes, n } << std::endl;
                 },
                 [&command](const char* bytes, size_t n) {
-                    std::cout << "[xc:run] " << command << "\n" << std::string{ bytes, n };
+                    std::cout << "[xc:run] " << command << "\n" << std::string{ bytes, n } << std::endl;
                 });
             return;
         }
@@ -191,8 +191,6 @@ namespace xc
         else if (build_path.find("releasedbg") != std::string::npos) mode = "releasedbg";
         else mode = "release";
 
-        run("xmake", { "config", "-P", build_path, "--import=build/xmake-config-" + mode + ".txt" }, xlogger_);
-
         auto target_name = parameter_value("target", "all");
         auto target = target_name;
         if (target == "clean")
@@ -203,6 +201,8 @@ namespace xc
         else if (target_name == "all") target = "--all";
 
         log("initialize build | target {} | mode {}", color(target_name, "92"), color(mode, "92"));
+
+        run("xmake", { "config", "-P", build_path, "--import=build/xmake-config-" + mode + ".txt", "-y" }, xlogger_);
 
         auto time = std::chrono::system_clock::now();
         run("xmake", { "build", "-P", build_path, target }, [this](std::string data) {
@@ -227,6 +227,11 @@ namespace xc
         log("build directory: {}", build_directory);
         working_directory_ = source_directory;
 
+        if (!std::filesystem::exists(source_directory + "/xmake.lua"))
+        {
+            run("xmake", { "config", "-c", "-y" });
+        }
+
         auto mode = xc::xmake_value[parameter_value("CMAKE_BUILD_TYPE", "Release")];
 
         log("input configuration | mode {}", mode);
@@ -236,7 +241,7 @@ namespace xc
         xmake_config.emplace_back("-m");
         xmake_config.emplace_back(mode);
         xmake_config.emplace_back("--export=" + source_directory + "/build/xmake-config-" + mode + ".txt");
-        xmake_config.emplace_back("-y");
+        xmake_config.emplace_back("--confirm=n");
 
         for (const auto& parameter : parameters_)
         {
@@ -254,7 +259,7 @@ namespace xc
         run("xmake", xmake_config, xlogger_);
 
         log("generate cmakelists");
-        run("xmake", { "project", "-k", "cmake", "-y" }, xlogger_);
+        run("xmake", { "project", "-k", "cmake" }, xlogger_);
 
         auto clog = [this](std::string data) {
             if (data == "-- Generating done\n") log("cmake generation succeed");
