@@ -28,6 +28,12 @@ namespace xc
 
     void xcmake::process()
     {
+        /*
+        std::ofstream ofs;
+        ofs.open("d:/clion_output.txt", std::ios::app);
+        for (int i = 0; i < parameters_.size(); ++i) ofs << parameters_[i].name << std::endl;
+        std::cout << "cmake version 3.24.1\n";
+        return;*/
         if (parameters_.empty())
         {
             log("run");
@@ -38,7 +44,7 @@ namespace xc
         {
             auto verbose = verbose_;
             verbose_ = false;
-            std::cout << "cmake version cmake " << cmake_version() << " | xmake " << xmake_version() << " | xc 1.0.2";
+            std::cout << "cmake version " << cmake_version(); // not working anymore << " | xmake " << xmake_version() << " | xc 1.0.2";
             verbose_ = verbose;
             return;
         }
