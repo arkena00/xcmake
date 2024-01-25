@@ -19,8 +19,13 @@ jobs:
     runs-on: ${{ matrix.platform.runner }}
 
     steps:
-      - uses: xmake-io/github-action-setup-xmake@v1
-      - uses: actions/checkout@master
+      - name: Setup xmake
+        uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          actions-cache-folder: .xmake-cache
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Configure xmake and install dependencies
         run: xmake config --arch=${{ matrix.platform.arch }} --yes -vD
