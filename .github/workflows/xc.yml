@@ -12,7 +12,9 @@ jobs:
         platform:
         - { runner: windows-latest, os: windows, arch: x64, bin_ext: .exe }
         - { runner: ubuntu-latest,  os: linux,   arch: x86_64 }
+        - { runner: ubuntu-latest,  os: linux,   arch: arm64-v8a }
         - { runner: macos-latest,   os: macos,   arch: x86_64 }
+        - { runner: macos-latest,   os: macos,   arch: arm64 }
 
     runs-on: ${{ matrix.platform.runner }}
 
