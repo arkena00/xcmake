@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <iomanip>
+#include <sstream>
 
 namespace xc
 {
