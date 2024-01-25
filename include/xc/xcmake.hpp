@@ -5,8 +5,7 @@
 #include <xc/utility.hpp>
 
 
-
-#include <format>
+#include <fmt/core.h>
 #include <functional>
 #include <iostream>
 #include <ranges>
@@ -83,13 +82,13 @@ namespace xc
     template<typename... Args>
     void xcmake::error(std::string_view message, Args&&... args) const
     {
-        std::cout << "[xc] [xc:" + color("error", "101") + "] " << std::vformat(message, std::make_format_args(args...)) << std::endl;
+        std::cout << "[xc] [xc:" + color("error", "101") + "] " << fmt::vformat(message, fmt::make_format_args(args...)) << std::endl;
     }
 
     template<typename... Args>
     void xcmake::log(std::string_view message, Args&&... args) const
     {
-        std::cout << color("[xc]", "34") << " " << std::vformat(message, std::make_format_args(args...)) << std::endl;
+        std::cout << color("[xc]", "34") << " " << fmt::vformat(message, fmt::make_format_args(args...)) << std::endl;
     }
 } // xc
 
