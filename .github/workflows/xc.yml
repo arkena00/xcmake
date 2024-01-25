@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-        - { runner: windows-latest, os: windows, arch: x64 }
+        - { runner: windows-latest, os: windows, arch: x64, bin_ext: .exe }
         - { runner: ubuntu-latest,  os: linux,   arch: x86_64 }
         - { runner: macos-latest,   os: macos,   arch: x86_64 }
 
@@ -32,8 +32,8 @@ jobs:
         if: ${{ (github.ref == 'refs/heads/dev') && github.event_name == 'push' }}
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/${{ matrix.platform.os }}/${{ matrix.platform.arch }}/release/xc*
-          file_glob: true
+          file: build/${{ matrix.platform.os }}/${{ matrix.platform.arch }}/release/xc${{ matrix.platform.bin_ext }}
+          asset_name: ${{ matrix.platform.os }}-${{ matrix.platform.arch }}-xc${{ matrix.platform.bin_ext }}
           tag: nightly
           overwrite: true
   
@@ -44,6 +44,6 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: build/${{ matrix.platform.os }}/${{ matrix.platform.arch }}/release/xc*
-          file_glob: true
+          asset_name: ${{ matrix.platform.os }}-${{ matrix.platform.arch }}-xc${{ matrix.platform.bin_ext }}
           tag: ${{ github.ref }}
           overwrite: true
