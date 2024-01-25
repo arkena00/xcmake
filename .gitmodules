@@ -1,3 +1,0 @@
-[submodule "third_party/tiny-process-library"]
-	path = third_party/tiny-process-library
-	url = https://gitlab.com/eidheim/tiny-process-library.git

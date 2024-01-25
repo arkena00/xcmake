@@ -1,7 +1,6 @@
 add_rules("mode.debug", "mode.release")
 set_languages("cxx20")
 
-add_repositories("local repo")
 add_requires("tiny-process-library")
 
 target("xc")
