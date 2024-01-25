@@ -31,10 +31,10 @@ jobs:
       - name: Build
         run: xmake -y
 
-      # Nightly tags (for commits to dev branch)
-      - name: Upload binaries to release (Dev)
+      # Nightly tags (for commits to master branch)
+      - name: Upload binaries to release (master)
         uses: svenstaro/upload-release-action@v2
-        if: ${{ (github.ref == 'refs/heads/dev') && github.event_name == 'push' }}
+        if: ${{ (github.ref == 'refs/heads/master') && github.event_name == 'push' }}
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: build/${{ matrix.platform.os }}/${{ matrix.platform.arch }}/release/xc${{ matrix.platform.bin_ext }}
